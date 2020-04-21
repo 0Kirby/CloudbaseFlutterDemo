@@ -1,14 +1,14 @@
 import 'dart:io';
-
-import 'package:cloudbase_auth/cloudbase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:cloudbase_core/cloudbase_core.dart';
-import 'package:cloudbase_database/cloudbase_database.dart';
+import 'package:cloudbase_auth/cloudbase_auth.dart';
 import 'package:cloudbase_function/cloudbase_function.dart';
 import 'package:cloudbase_storage/cloudbase_storage.dart';
-import 'package:flutter/material.dart';
+import 'package:cloudbase_database/cloudbase_database.dart';
 import 'package:path_provider/path_provider.dart';
 
 final _envId = 'env-xxxx'; //填入您的云开发环境ID
+final _function = 'xxxx'; //填入您创建的云函数的名称
 final _collection = 'xxxx'; //填入您的云数据库集合名称
 final _fileId = 'cloud://xxxx'; //填入您上传到云存储的文件地址
 
@@ -22,13 +22,14 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _output = '运行结果将会显示在这里';
   String _code;
   String _stdin;
-  TextEditingController selectionController = TextEditingController();
+  String _output = '运行结果将会显示在这里';
+
+  TextEditingController selectionController = new TextEditingController();
   GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
 
-  void _formSubmitted() async {
+  _formSubmitted() async {
     var _form = _formKey.currentState;
 
     if (_form.validate()) {
@@ -38,7 +39,7 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  Future<void> _cloudFunction() async {
+  _cloudFunction() async {
     CloudBaseCore core = CloudBaseCore.init({'env': _envId});
 // 获取登录状态
     CloudBaseAuth auth = CloudBaseAuth(core);
@@ -55,7 +56,7 @@ class _MyAppState extends State<MyApp> {
     }
     CloudBaseFunction cloudbase = CloudBaseFunction(core);
     Map<String, dynamic> data = {'code': _code, 'stdin': _stdin};
-    CloudBaseResponse res = await cloudbase.callFunction('glot', data);
+    CloudBaseResponse res = await cloudbase.callFunction(_function, data);
     setState(() {
       _output = res.data;
     });
@@ -69,9 +70,9 @@ class _MyAppState extends State<MyApp> {
     return path;
   }
 
-  void _cloudStorage() async {
+  _cloudStorage() async {
     String docPath = await _getDocumentsPath();
-    String savePath = '$docPath/code.txt';
+    String _savePath = '$docPath/code.txt';
     CloudBaseCore core = CloudBaseCore.init({'env': _envId});
 // 获取登录状态
     CloudBaseAuth auth = CloudBaseAuth(core);
@@ -88,12 +89,12 @@ class _MyAppState extends State<MyApp> {
     }
     CloudBaseStorage storage = CloudBaseStorage(core);
 
-    await storage.downloadFile(fileId: _fileId, savePath: savePath);
-    final File file = new File(savePath);
+    await storage.downloadFile(fileId: _fileId, savePath: _savePath);
+    final File file = new File(_savePath);
     selectionController.text = file.readAsStringSync();
   }
 
-  void _cloudDatabase() async {
+  _cloudDatabase() async {
     CloudBaseCore core = CloudBaseCore.init({'env': _envId});
 // 获取登录状态
     CloudBaseAuth auth = CloudBaseAuth(core);
